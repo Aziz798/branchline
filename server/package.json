@@ -1,0 +1,27 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "npx drizzle-kit migrate",
+    "db:push": "npx drizzle-kit push",
+    "db:studio": "pnpm drizzle-kit studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.0.7",
+    "@types/pg": "^8.15.4",
+    "drizzle-kit": "^0.31.4",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "dotenv": "^17.0.0",
+    "drizzle-orm": "^0.44.2",
+    "pg": "^8.16.3"
+  },
+  "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a"
+}
