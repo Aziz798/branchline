@@ -1,58 +1,45 @@
 package user
 
 import (
-	"fmt"
-
-	globalTypes "branchline.me/server/src/libs/go/models"
-	"branchline.me/server/src/libs/go/utils"
+	"branchline.me/server/src/libs/go/models"
 	"branchline.me/server/src/services/auth-service/internal/types"
 	"github.com/jmoiron/sqlx"
 )
 
-func userExistsQuery(email string, db *sqlx.DB) (bool, error) {
-	q := `SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)`
+func RegisterUserWithEmailQuery(user types.UserRegistrationType, hashedOTP string, tx *sqlx.Tx) error {
+	q := `INSERT INTO users (first_name, last_name, email, password, login_provider, is_active, otp_secret) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	_, err := tx.Exec(q, user.FirstName, user.LastName, user.Email, user.Password, "email", false, hashedOTP)
+	return err
+}
+
+func CheckIfUserExistsByEmailQuery(email string, db *sqlx.DB) (bool, error) {
 	var exists bool
+	q := `SELECT EXISTS(SELECT 1 FROM users WHERE email=$1)`
 	err := db.Get(&exists, q, email)
-	if err != nil {
-		return false, fmt.Errorf("error checking if user exists: %s", err.Error())
-	}
-	return exists, nil
+	return exists, err
 }
 
-func createUserByEmailQuery(userRegistration types.UserRegistrationType, db *sqlx.DB) (string, string, error) {
-	q := `INSERT INTO users (first_name, last_name, email, password, login_provider, otp_secret) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
-
-	otpCode, err := utils.GenerateOTPCode()
+func GetUserByEmailQuery(email string, db *sqlx.DB) (*models.UserTable, error) {
+	var user models.UserTable
+	q := `SELECT id, first_name, last_name, email, role, password, is_active, is_premium, 
+          premium_start_date, premium_end_date, login_provider, otp_secret, created_at, updated_at
+          FROM users WHERE email=$1`
+	err := db.Get(&user, q, email)
 	if err != nil {
-		return "", "", fmt.Errorf("error generating OTP code: %s", err.Error())
+		return nil, err
 	}
-	hashedOTP, err := utils.HashOTP(otpCode)
-	if err != nil {
-		return "", "", fmt.Errorf("error hashing OTP: %s", err.Error())
-	}
-	var userID string
-	err = db.Get(&userID, q, userRegistration.FirstName, userRegistration.LastName, userRegistration.Email, userRegistration.Password, globalTypes.EmailUserLoginProvider, hashedOTP)
-	if err != nil {
-		return "", "", fmt.Errorf("error creating user: %s", err.Error())
-	}
-	return otpCode, userID, nil
+	return &user, nil
 }
 
-func getUserOtpCodeQuery(userID string, db *sqlx.DB) (string, error) {
-	q := `SELECT otp_secret FROM users WHERE id = $1`
-	var otpCode string
-	err := db.Get(&otpCode, q, userID)
-	if err != nil {
-		return "", fmt.Errorf("error getting user OTP code: %s", err.Error())
-	}
-	return otpCode, nil
+func ActivateUserAndClearOTPQuery(email string, db *sqlx.DB) error {
+	q := `UPDATE users SET is_active = true, otp_secret = NULL, updated_at = NOW() WHERE email = $1`
+	_, err := db.Exec(q, email)
+	return err
 }
 
-func verifyUserOtpCodeQuery(userID string, db *sqlx.DB) error {
-	q := `UPDATE users SET is_active = true WHERE id = $1`
-	_, err := db.Exec(q, userID)
-	if err != nil {
-		return fmt.Errorf("error verifying user OTP code: %s", err.Error())
-	}
-	return nil
+func UpdateUserOTPQuery(email, hashedOTP string, db *sqlx.DB) error {
+	q := `UPDATE users SET otp_secret = $1, updated_at = NOW() WHERE email = $2`
+	_, err := db.Exec(q, hashedOTP, email)
+	return err
 }

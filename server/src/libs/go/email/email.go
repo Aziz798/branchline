@@ -20,7 +20,7 @@ func SendEmailVerificationEmail(otpCode, recipientEmail string) error {
 	mg := mailgun.NewMailgun(domainName, apiKey)
 	mg.SetAPIBase(mailgun.APIBaseEU)
 	sender := emailAddress
-	subject := "Email Verification"
+	subject := "Verify Your Email Address"
 	body := fmt.Sprintf(`
 	<!DOCTYPE html>
 <html lang="en">

@@ -1,6 +1,9 @@
 package validations
 
 import (
+	"reflect"
+	"strings"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -26,17 +29,46 @@ var globalValidator = &xValidator{
 }
 
 // Validate validates the given data using the global validator instance
-func (v *xValidator) Validate(data interface{}) []string {
+func (v *xValidator) Validate(data any) []string {
 	validationErrors := []string{}
 
 	errs := v.validator.Struct(data)
 	if errs != nil {
 		for _, err := range errs.(validator.ValidationErrors) {
-			validationErrors = append(validationErrors, err.Field())
+			// Get the JSON tag name instead of the field name
+			jsonTag := getJSONTag(data, err.Field())
+			validationErrors = append(validationErrors, jsonTag)
 		}
 	}
 
 	return validationErrors
+}
+
+// getJSONTag extracts the JSON tag name from the struct field
+func getJSONTag(data any, fieldName string) string {
+	dataType := reflect.TypeOf(data)
+
+	// Handle pointer types
+	if dataType.Kind() == reflect.Ptr {
+		dataType = dataType.Elem()
+	}
+
+	field, found := dataType.FieldByName(fieldName)
+	if !found {
+		return fieldName // fallback to field name if not found
+	}
+
+	jsonTag := field.Tag.Get("json")
+	if jsonTag == "" {
+		return fieldName // fallback to field name if no json tag
+	}
+
+	// Handle cases like `json:"email,omitempty"`
+	if idx := strings.Index(jsonTag, ","); idx != -1 {
+		jsonTag = jsonTag[:idx]
+	}
+
+	return jsonTag
 }
 
 // GetGlobalValidator returns the global validator instance
