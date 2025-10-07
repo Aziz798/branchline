@@ -4,12 +4,14 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/go-playground/locales/fr"
+	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 )
 
 // Validator interface defines the contract for validation
 type Validator interface {
-	Validate(data any) []string
+	Validate(data any) interface{}
 }
 
 // xValidator implements the Validator interface using a global validator instance
@@ -29,19 +31,15 @@ var globalValidator = &xValidator{
 }
 
 // Validate validates the given data using the global validator instance
-func (v *xValidator) Validate(data any) []string {
-	validationErrors := []string{}
-
+func (v *xValidator) Validate(data any) interface{} {
+	uni := ut.New(fr.New(), fr.New())
+	trans, _ := uni.GetTranslator("fr")
 	errs := v.validator.Struct(data)
 	if errs != nil {
-		for _, err := range errs.(validator.ValidationErrors) {
-			// Get the JSON tag name instead of the field name
-			jsonTag := getJSONTag(data, err.Field())
-			validationErrors = append(validationErrors, jsonTag)
-		}
+		return errs.(validator.ValidationErrors).Translate(trans)
 	}
 
-	return validationErrors
+	return nil
 }
 
 // getJSONTag extracts the JSON tag name from the struct field

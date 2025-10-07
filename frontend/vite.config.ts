@@ -1,19 +1,26 @@
 import { defineConfig } from "vite";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import solidPlugin from "vite-plugin-solid";
+import react from "@vitejs/plugin-react";
+import path from "path";
 import tailwindcss from "@tailwindcss/vite";
-import { resolve } from "node:path";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
-// https://vitejs.dev/config/
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    tanstackRouter({ target: "solid", autoCodeSplitting: true }),
-    solidPlugin(),
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: true,
+    }),
+    react({
+      babel: {
+        plugins: [["babel-plugin-react-compiler"]],
+      },
+    }),
     tailwindcss(),
   ],
   resolve: {
     alias: {
-      "~": resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "src"),
     },
   },
 });

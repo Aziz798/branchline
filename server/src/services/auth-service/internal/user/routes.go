@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterUserRoutes(api fiber.Router, db *sqlx.DB) {
-	userGroup := api.Group("/user")
+	userGroup := api.Group("/users")
 	registerUserWithEmailRoute(userGroup, db)
 	verifyEmailRoute(userGroup, db)
 	resendVerificationEmailRoute(userGroup, db)

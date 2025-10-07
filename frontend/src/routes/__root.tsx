@@ -1,27 +1,24 @@
-import {
-  createRootRouteWithContext,
-  HeadContent,
-  Outlet,
-  Scripts,
-} from "@tanstack/solid-router";
-import { TanStackRouterDevtools } from "@tanstack/solid-router-devtools";
-import TanStackQueryProvider from "../integrations/tanstack-query/provider.tsx";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { ThemeProvider } from "@/contexts/theme-provider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ModeToggle } from "@/components/theme/mode-togle";
+import { AuthProvider } from "@/contexts/auth-context";
 
-export const Route = createRootRouteWithContext()({
-  shellComponent: RootComponent,
-});
+const queryClient = new QueryClient();
 
-function RootComponent() {
-  return (
-    <>
-      <TanStackQueryProvider>
-        <HeadContent />
+const RootLayout = () => (
+    <ThemeProvider defaultTheme="system" storageKey="theme">
+        <QueryClientProvider client={queryClient}>
+            <ModeToggle />
+            <AuthProvider>
+                <Outlet />
+            </AuthProvider>
+            <TanStackRouterDevtools initialIsOpen={false} />
+            <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+    </ThemeProvider>
+);
 
-        <Outlet />
-        <TanStackRouterDevtools />
-      </TanStackQueryProvider>
-
-      <Scripts />
-    </>
-  );
-}
+export const Route = createRootRoute({ component: RootLayout });

@@ -6,10 +6,10 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func ValidateUserRegistrationWithEmail(user types.UserRegistrationType) []string {
+func ValidateUserRegistrationWithEmail(user types.UserRegistrationType) interface{} {
 	v := validations.GetGlobalValidator()
 	errors := v.Validate(user)
-	if len(errors) > 0 {
+	if errors != nil {
 		return errors
 	}
 	return nil
