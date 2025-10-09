@@ -5,6 +5,7 @@ import (
 
 	"branchline.me/server/src/libs/go/database"
 	"branchline.me/server/src/libs/go/validations"
+	"branchline.me/server/src/services/auth-service/oauth"
 )
 
 type AuthServer struct {
@@ -28,6 +29,9 @@ func New() *AuthServer {
 
 		db: database.New(),
 	}
+
+	// Initialize OAuth configuration
+	oauth.GoogleConfig()
 
 	return server
 }

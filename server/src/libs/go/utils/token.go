@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -19,7 +19,7 @@ var (
 // GenerateToken generates a new access token and refresh token for the given user.
 // The access token is valid for 15 minutes and the refresh token is valid for 7 days.
 // The function returns the access token, refresh token and an error.
-func GenerateToken(userID pgtype.UUID, userRole string, isPremium, isActive bool) (string, string, error) {
+func GenerateToken(userID uuid.UUID, userRole string, isPremium, isActive bool) (string, string, error) {
 	// Access Token
 	accessClaims := jwt.MapClaims{
 		"user_id":    userID,

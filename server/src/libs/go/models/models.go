@@ -43,8 +43,7 @@ const (
 
 type UserTable struct {
 	ID               pgtype.UUID       `db:"id" json:"id"`
-	FirstName        pgtype.Text       `db:"first_name" json:"first_name"`
-	LastName         pgtype.Text       `db:"last_name" json:"last_name"`
+	Name             pgtype.Text       `db:"name" json:"name"`
 	Email            pgtype.Text       `db:"email" json:"email"`
 	Role             UserRole          `db:"role" json:"role"`
 	Password         pgtype.Text       `db:"password" json:"password"`

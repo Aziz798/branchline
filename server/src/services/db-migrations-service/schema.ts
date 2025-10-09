@@ -50,8 +50,7 @@ export const taskStatuses = pgEnum("task_statuses", [
 
 export const usersTable = pgTable("users", {
     id: uuid("id").primaryKey().defaultRandom(),
-    first_name: varchar({ length: 255 }).notNull(),
-    last_name: varchar({ length: 255 }).notNull(),
+    name: varchar({ length: 255 }).notNull(),
     email: varchar({ length: 255 }).notNull().unique(),
     role: userRoles("role").default("user").notNull(),
     password: varchar({ length: 255 }),

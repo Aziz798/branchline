@@ -3,12 +3,14 @@ package user
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"branchline.me/server/src/libs/go/email"
 	mailLibrary "branchline.me/server/src/libs/go/email"
 	"branchline.me/server/src/libs/go/utils"
 	"branchline.me/server/src/services/auth-service/internal/types"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,91 +23,105 @@ var (
 	ErrDatabaseOperation = errors.New("database operation failed")
 )
 
-func RegisterUserWithEmailService(user types.UserRegistrationType, db *sqlx.DB) (int, error) {
+func RegisterUserWithEmailService(user types.UserRegistrationType, db *sqlx.DB) (uuid.UUID, int, error) {
 	// Check if user already exists
 	exists, err := CheckIfUserExistsByEmailQuery(user.Email, db)
 	if err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+		log.Default().Println("Error checking user existence:", err)
+		return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
 	}
 	if exists {
-		return fiber.StatusConflict, ErrUserExists
+		return uuid.Nil, fiber.StatusConflict, ErrUserExists
 	}
 
 	// Hash the password
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrPasswordHashing, err)
+		log.Default().Println("Error hashing password:", err)
+		return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrPasswordHashing, err)
 	}
 	user.Password = hashedPassword
 
 	// Generate OTP for email verification
 	otpCode, err := utils.GenerateOTPCode()
 	if err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrOTPGeneration, err)
+		log.Default().Println("Error generating OTP:", err)
+		return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrOTPGeneration, err)
 	}
 
 	// Hash the OTP for storage
 	hashedOTP, err := utils.HashOTP(otpCode)
 	if err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrPasswordHashing, err)
+		log.Default().Println("Error hashing OTP:", err)
+		return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrPasswordHashing, err)
 	}
 
 	// Start database transaction
 	tx, err := db.Beginx()
 	if err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: failed to start transaction: %v", ErrDatabaseOperation, err)
+		log.Default().Println("Error starting transaction:", err)
+		return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: failed to start transaction: %v", ErrDatabaseOperation, err)
 	}
 	defer tx.Rollback()
 
 	// Register user with hashed OTP
-	err = RegisterUserWithEmailQuery(user, hashedOTP, tx)
+	userID, err := RegisterUserWithEmailQuery(user, hashedOTP, tx)
 	if err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+		log.Default().Println("Error registering user:", err)
+		return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
 	}
 
 	// Send verification email
 	err = email.SendEmailVerificationEmail(otpCode, user.Email)
 	if err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrEmailSendFailed, err)
+		log.Default().Println("Error sending verification email:", err)
+		return userID, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrEmailSendFailed, err)
 	}
 
 	// Commit transaction
 	if err = tx.Commit(); err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: failed to commit transaction: %v", ErrDatabaseOperation, err)
+		log.Default().Println("Error committing transaction:", err)
+		return userID, fiber.StatusInternalServerError, fmt.Errorf("%w: failed to commit transaction: %v", ErrDatabaseOperation, err)
 	}
 
-	return fiber.StatusCreated, nil
+	return userID, fiber.StatusCreated, nil
 }
 
-func VerifyEmailService(email, otpCode string, db *sqlx.DB) (int, error) {
+func VerifyEmailService(userID, otpCode string, db *sqlx.DB) (*types.Tokens, int, error) {
 	// Get user by email
-	user, err := GetUserByEmailQuery(email, db)
+	user, err := GetUserByIDQuery(userID, db)
 	if err != nil {
-		return fiber.StatusNotFound, ErrUserNotFound
+		return nil, fiber.StatusNotFound, ErrUserNotFound
 	}
 
 	// Check if user is already active
 	if user.IsActive.Bool {
-		return fiber.StatusBadRequest, errors.New("user email is already verified")
+		return nil, fiber.StatusBadRequest, errors.New("user email is already verified")
 	}
 
 	// Verify OTP
 	if user.OtpSecret.String == "" {
-		return fiber.StatusBadRequest, errors.New("no verification code found for this user")
+		return nil, fiber.StatusBadRequest, errors.New("no verification code found for this user")
 	}
 
 	err = utils.VerifyOTP(user.OtpSecret.String, otpCode)
 	if err != nil {
-		return fiber.StatusBadRequest, errors.New("invalid or expired verification code")
+		return nil, fiber.StatusBadRequest, errors.New("invalid or expired verification code")
 	}
 
 	// Activate user and clear OTP
-	err = ActivateUserAndClearOTPQuery(email, db)
+	err = ActivateUserAndClearOTPQuery(userID, db)
 	if err != nil {
-		return fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+		return nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
 	}
-
-	return fiber.StatusOK, nil
+	token, refreshToken, err := utils.GenerateToken(user.ID.Bytes, string(user.Role), user.IsPremium.Bool, user.IsActive.Bool)
+	if err != nil {
+		return nil, fiber.StatusInternalServerError, fmt.Errorf("failed to generate auth token: %v", err)
+	}
+	return &types.Tokens{
+		AccessToken:  token,
+		RefreshToken: refreshToken,
+	}, fiber.StatusOK, nil
 }
 
 func ResendVerificationEmailService(email string, db *sqlx.DB) (int, error) {

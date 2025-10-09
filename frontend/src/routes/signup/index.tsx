@@ -1,12 +1,15 @@
+import OtpCodeDialog from "@/components/auth/otp-code-dialog";
 import SignupForm from "@/components/auth/signup-form";
 import { createFileRoute } from "@tanstack/react-router";
 import { GalleryVerticalEnd } from "lucide-react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/signup/")({
-  component: RouteComponent,
+  component: SignupPage,
 });
 
-function RouteComponent() {
+function SignupPage() {
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
@@ -20,9 +23,10 @@ function RouteComponent() {
             </div>
             Acme Inc.
           </a>
-          <SignupForm />
+          <SignupForm setIsOpen={setIsOpen} />
         </div>
       </div>
+      <OtpCodeDialog isOpen={isOpen} setIsOpen={setIsOpen} />
     </>
   );
 }

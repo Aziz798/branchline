@@ -35,7 +35,12 @@ run-auth-service: build-auth-service
 	@echo "Running auth service..."
 	@./bin/auth-service
 
+watch-auth-service:
+	@echo "Watching auth service..."
+	@air -c ./src/services/auth-service/.air.toml
+
 # Clean the binary
 clean:
 	@echo "Cleaning..."
 	@rm -Force -Recurse .\bin
+

@@ -1,3 +1,5 @@
+import api from "@/api/axios";
+import { AUTH_API } from "@/api/base-api-endpoints";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -14,15 +16,17 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/auth-context";
 import { validateSignupForm } from "@/lib/validators/auth-validations";
 import type { SignupFormErrorsType, SignupFormType } from "@/types/auth-types";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+// Removed direct axios import; using shared api instance
 import { EyeIcon, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { z } from "zod";
 
-export default function SignupForm() {
+export default function SignupForm(
+    { setIsOpen }: { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> },
+) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [form, setForm] = useState<SignupFormType>({
@@ -32,26 +36,55 @@ export default function SignupForm() {
         confirm_password: "",
     });
     const [errors, setErrors] = useState<SignupFormErrorsType | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const authContext = useAuth();
+
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         setForm({ ...form, [e.target.name]: e.target.value });
     }
 
     const mutation = useMutation({
-        mutationFn: (payload: typeof form) =>
-            axios.post(
-                "http://localhost:8080/api/v1/auth-service/register",
+        mutationKey: ["signup"],
+        mutationFn: async (payload: typeof form) =>
+            await api.post(
+                AUTH_API + "/users/register",
                 payload,
             ),
     });
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        setSubmitError(null);
         const result = validateSignupForm(form);
         if (!result.success) {
-            setErrors(result.errors);
+            console.log(errors);
+
+            setErrors(result.errors ?? null);
             return;
         }
         setErrors(null);
-        mutation.mutate(form);
+        setIsSubmitting(true);
+        mutation.mutate(form, {
+            onSuccess: (respnse) => {
+                authContext.setAccessToken(respnse.data.access_token);
+                setIsOpen(true);
+            },
+            onError: (error: any) => {
+                if (error.status === 500) {
+                    setSubmitError("Something went wrong. Please try again.");
+                }
+                if (error.status === 409) {
+                    setSubmitError("User with this email already exists.");
+                    setErrors({
+                        email: { errors: ["Email already in use."] },
+                    });
+                }
+                if (error.status === 400) {
+                    setErrors(error.response.data.errors);
+                }
+            },
+            onSettled: () => setIsSubmitting(false),
+        });
     }
     return (
         <div className={"flex flex-col gap-6"}>
@@ -184,7 +217,16 @@ export default function SignupForm() {
                                 </FieldDescription>
                             </Field>
                             <Field>
-                                <Button type="submit">Create Account</Button>
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting
+                                        ? "Creating..."
+                                        : "Create Account"}
+                                </Button>
+                                {submitError && (
+                                    <FieldError className="mt-2 text-center">
+                                        {submitError}
+                                    </FieldError>
+                                )}
                                 <FieldDescription className="text-center">
                                     Already have an account?{" "}
                                     <a href="#">Sign in</a>

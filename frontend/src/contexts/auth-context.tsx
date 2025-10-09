@@ -1,4 +1,5 @@
-// src/contexts/auth-context.tsx
+import api, { setAccessTokenGetter } from "@/api/axios";
+import { AUTH_API } from "@/api/base-api-endpoints";
 import {
     createContext,
     type ReactNode,
@@ -6,7 +7,6 @@ import {
     useEffect,
     useState,
 } from "react";
-import api from "@/api/axios";
 
 type AuthContextType = {
     accessToken: string | null;
@@ -23,11 +23,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = (
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Register a getter so Axios can read the current token
+    useEffect(() => {
+        setAccessTokenGetter(() => accessToken);
+    }, [accessToken]);
+
     useEffect(() => {
         const initAuth = async () => {
             try {
-                const res = await api.post("/refresh");
-                setAccessToken(res.data.accessToken);
+                const res = await api.post(AUTH_API + "/users/refresh-token"); // refresh cookie → new token
+                setAccessToken(res.data.access_token);
+                console.log("Session restored");
             } catch {
                 console.warn("No valid session found");
             } finally {
@@ -38,8 +44,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = (
     }, []);
 
     const logout = async () => {
-        await api.post("/logout");
-        setAccessToken(null);
+        try {
+            await api.post("/auth/users/logout");
+        } catch {
+            // ignore
+        } finally {
+            setAccessToken(null);
+        }
     };
 
     return (
@@ -52,9 +63,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = (
 };
 
 export const useAuth = (): AuthContextType => {
-    const context = useContext(AuthContext);
-    if (!context) {
+    const ctx = useContext(AuthContext);
+    if (!ctx) {
         throw new Error("useAuth must be used within an AuthProvider");
     }
-    return context;
+    return ctx;
 };

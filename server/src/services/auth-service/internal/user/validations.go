@@ -6,8 +6,9 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+var v = validations.GetGlobalValidator()
+
 func ValidateUserRegistrationWithEmail(user types.UserRegistrationType) interface{} {
-	v := validations.GetGlobalValidator()
 	errors := v.Validate(user)
 	if errors != nil {
 		return errors
@@ -15,32 +16,16 @@ func ValidateUserRegistrationWithEmail(user types.UserRegistrationType) interfac
 	return nil
 }
 
-func ValidateEmailVerification(email, otpCode string) []string {
-	v := validator.New()
+func ValidateEmailVerification(otpCode string) interface{} {
 
 	type EmailVerificationRequest struct {
-		Email   string `validate:"required,email"`
 		OTPCode string `validate:"required,len=6"`
 	}
-
-	request := EmailVerificationRequest{
-		Email:   email,
-		OTPCode: otpCode,
+	errors := v.Validate(EmailVerificationRequest{OTPCode: otpCode})
+	if errors != nil {
+		return errors
 	}
-
-	var errors []string
-	if err := v.Struct(request); err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			switch err.Field() {
-			case "Email":
-				errors = append(errors, "valid email is required")
-			case "OTPCode":
-				errors = append(errors, "6-digit OTP code is required")
-			}
-		}
-	}
-
-	return errors
+	return nil
 }
 
 func ValidateEmailResend(email string) []string {

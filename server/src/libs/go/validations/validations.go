@@ -1,11 +1,11 @@
 package validations
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
+	"unicode"
 
-	"github.com/go-playground/locales/fr"
-	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -32,14 +32,69 @@ var globalValidator = &xValidator{
 
 // Validate validates the given data using the global validator instance
 func (v *xValidator) Validate(data any) interface{} {
-	uni := ut.New(fr.New(), fr.New())
-	trans, _ := uni.GetTranslator("fr")
 	errs := v.validator.Struct(data)
-	if errs != nil {
-		return errs.(validator.ValidationErrors).Translate(trans)
+	if errs == nil {
+		return nil
 	}
 
-	return nil
+	validationErrors := errs.(validator.ValidationErrors)
+	errorMap := make(map[string]struct {
+		Errors []string `json:"errors"`
+	})
+	for _, fieldErr := range validationErrors {
+		fieldName := getJSONTag(data, fieldErr.StructField())
+		errorMap[fieldName] = struct {
+			Errors []string `json:"errors"`
+		}{
+			Errors: append([]string{}, formatValidationError(fieldErr, data)),
+		}
+	}
+
+	return errorMap
+
+}
+
+// formatValidationError builds a user-friendly error message for a validation error
+func formatValidationError(fe validator.FieldError, data any) string {
+	// human readable field name based on json tag
+	fieldJSON := getJSONTag(data, fe.StructField())
+	human := humanize(fieldJSON)
+
+	switch fe.Tag() {
+	case "required":
+		return fmt.Sprintf("%s is required", human)
+	case "email":
+		return fmt.Sprintf("%s must be a valid email address", human)
+	case "min":
+		return fmt.Sprintf("%s must be at least %s characters long", human, fe.Param())
+	case "max":
+		return fmt.Sprintf("%s must be at most %s characters long", human, fe.Param())
+	case "len":
+		return fmt.Sprintf("%s must be %s characters long", human, fe.Param())
+	case "gte":
+		return fmt.Sprintf("%s must be greater than or equal to %s", human, fe.Param())
+	case "lte":
+		return fmt.Sprintf("%s must be less than or equal to %s", human, fe.Param())
+	case "eqfield":
+		// param is the other struct field name; map it to json tag if possible
+		other := getJSONTag(data, fe.Param())
+		return fmt.Sprintf("%s must match %s", human, humanize(other))
+	default:
+		// generic fallback
+		return fmt.Sprintf("%s is invalid", human)
+	}
+}
+
+// humanize converts snake_case json field names into a nicer form: "first_name" -> "First name"
+func humanize(s string) string {
+	s = strings.ReplaceAll(s, "_", " ")
+	if s == "" {
+		return s
+	}
+	// capitalize first rune
+	runes := []rune(s)
+	runes[0] = unicode.ToUpper(runes[0])
+	return string(runes)
 }
 
 // getJSONTag extracts the JSON tag name from the struct field
