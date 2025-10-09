@@ -1,6 +1,8 @@
 package oauth
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -28,4 +30,14 @@ func GoogleConfig() oauth2.Config {
 		Endpoint: google.Endpoint,
 	}
 	return AppConfig.GoogleLoginConfig
+}
+
+// generateState generates a secure random state string for OAuth
+func generateState() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(b), nil
 }

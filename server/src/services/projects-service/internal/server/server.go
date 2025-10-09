@@ -5,20 +5,19 @@ import (
 
 	"branchline.me/server/src/libs/go/database"
 	"branchline.me/server/src/libs/go/validations"
-	"branchline.me/server/src/services/auth-service/internal/oauth"
 )
 
-type AuthServer struct {
+type ProjectsServer struct {
 	*fiber.App
 
 	db database.Service
 }
 
-func New() *AuthServer {
-	server := &AuthServer{
+func New() *ProjectsServer {
+	server := &ProjectsServer{
 		App: fiber.New(fiber.Config{
-			ServerHeader: "branchline-auth-service",
-			AppName:      "branchline-auth-service",
+			ServerHeader: "branchline-projects-service",
+			AppName:      "branchline-projects-service",
 			ErrorHandler: func(c *fiber.Ctx, err error) error {
 				return c.Status(fiber.StatusBadRequest).JSON(validations.GlobalErrorHandlerResp{
 					Success: false,
@@ -29,9 +28,5 @@ func New() *AuthServer {
 
 		db: database.New(),
 	}
-
-	// Initialize OAuth configuration
-	oauth.GoogleConfig()
-
 	return server
 }

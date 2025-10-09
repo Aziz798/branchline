@@ -1,24 +1,12 @@
 package oauth
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 )
-
-// generateState generates a secure random state string for OAuth
-func generateState() (string, error) {
-	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.EncodeToString(b), nil
-}
 
 func GoogleLogin(c *fiber.Ctx) error {
 	// Generate secure state

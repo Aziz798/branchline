@@ -31,14 +31,25 @@ build-auth-service:
 	@echo "Building auth service..."
 	@go build -o bin/auth-service ./src/services/auth-service/cmd/api/main.go
 
+build-projects-service:
+	@echo "Building projects service..."
+	@go build -o bin/projects-service ./src/services/projects-service/cmd/api/main.go
+
 run-auth-service: build-auth-service
 	@echo "Running auth service..."
 	@./bin/auth-service
+
+run-projects-service: build-projects-service
+	@echo "Running projects service..."
+	@./bin/projects-service
 
 watch-auth-service:
 	@echo "Watching auth service..."
 	@air -c ./src/services/auth-service/.air.toml
 
+watch-projects-service:
+	@echo "Watching projects service..."
+	@air -c ./src/services/projects-service/.air.toml
 # Clean the binary
 clean:
 	@echo "Cleaning..."

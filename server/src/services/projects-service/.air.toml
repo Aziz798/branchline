@@ -4,8 +4,8 @@ tmp_dir = "tmp"
 
 [build]
 args_bin = []
-bin = "./bin/auth-service"
-cmd = "go build -o ./bin/auth-service ./src/services/auth-service/cmd/api/main.go"
+bin = "./bin/projects-service"
+cmd = "go build -o ./bin/projects-service ./src/services/projects-service/cmd/api/main.go"
 delay = 1000
 exclude_dir = [
   "assets",
@@ -17,7 +17,7 @@ exclude_dir = [
   "node_modules",
   "bin",
   "./src/services/db-migrations",
-  "./src/services/projects-service",
+  "./src/services/auth-service",
 
 ]
 exclude_file = []

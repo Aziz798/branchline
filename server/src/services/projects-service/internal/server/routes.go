@@ -4,8 +4,7 @@ import (
 	"os"
 	"time"
 
-	"branchline.me/server/src/services/auth-service/internal/oauth"
-	"branchline.me/server/src/services/auth-service/internal/user"
+	"branchline.me/server/src/services/projects-service/internal/projects"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
@@ -17,8 +16,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-func (s *AuthServer) RegisterAuthServiceRoutes() {
-	api := s.App.Group("auth-service/api/v1/")
+func (s *ProjectsServer) RegisterProjectsServiceRoutes() {
+	api := s.App.Group("projects-service/api/v1/")
 	clientUrl := os.Getenv("CLIENT_URL")
 	if clientUrl == "" {
 		clientUrl = "http://localhost:5173"
@@ -41,8 +40,8 @@ func (s *AuthServer) RegisterAuthServiceRoutes() {
 
 	api.Use(idempotency.New(idempotency.ConfigDefault))
 	api.Use(limiter.New(limiter.Config{
-		Max:        50, // Increased limit for OAuth flows
-		Expiration: 5 * time.Minute,
+		Max:        100,
+		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.IP()
 		},
@@ -54,7 +53,5 @@ func (s *AuthServer) RegisterAuthServiceRoutes() {
 		SkipFailedRequests:     false,
 		SkipSuccessfulRequests: false,
 	}))
-	user.RegisterUserRoutes(api, s.db.DB())
-	api.Get("/google", oauth.GoogleLogin)
-	api.Get("/oauth/google/callback", oauth.GoogleCallback)
+	projects.RegisterProjectsServiceRoutes(api, s.db.DB())
 }

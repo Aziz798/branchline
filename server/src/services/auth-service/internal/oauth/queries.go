@@ -6,7 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func registerUserWithGoogleQuery(user types.GoogleOauthUser, db *sqlx.DB) (uuid.UUID, error) {
+func registerUserWithGoogleQuery(user types.GoogleOauthUser, db *sqlx.Tx) (uuid.UUID, error) {
 	q := `INSERT INTO users (name, email, login_provider, is_active) 
 			VALUES ($1, $2, $3, $4) RETURNING id`
 	var userID uuid.UUID

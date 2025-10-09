@@ -68,6 +68,9 @@ export const usersTable = pgTable("users", {
 
 export const projectsTable = pgTable("projects", {
     id: uuid("id").primaryKey().defaultRandom(),
+    owner_id: uuid("owner_id").notNull().references(() => usersTable.id, {
+        onDelete: "cascade",
+    }),
     name: varchar({ length: 255 }).notNull(),
     description: text(),
     start_date: date().notNull(),
@@ -80,7 +83,10 @@ export const projectsTable = pgTable("projects", {
 export const projectMembersTable = pgTable("project_members", {
     id: uuid("id").primaryKey(),
     user_id: uuid("user_id").notNull().references(() => usersTable.id),
-    project_id: uuid("project_id").notNull().references(() => projectsTable.id),
+    project_id: uuid("project_id").notNull().references(
+        () => projectsTable.id,
+        { onDelete: "cascade" },
+    ),
     role: userRoleInProjects("role").notNull(),
     created_at: timestamp().notNull().defaultNow(),
     updated_at: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
@@ -99,7 +105,10 @@ export const tasksTable = pgTable("tasks", {
     end_date: date(),
     status: taskStatuses("status").default("not_started").notNull(),
     user_id: uuid("user_id").notNull().references(() => usersTable.id),
-    project_id: uuid("project_id").notNull().references(() => projectsTable.id),
+    project_id: uuid("project_id").notNull().references(
+        () => projectsTable.id,
+        { onDelete: "cascade" },
+    ),
     created_at: timestamp().notNull().defaultNow(),
     updated_at: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
 }, (table) => [
