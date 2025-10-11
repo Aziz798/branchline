@@ -1,5 +1,4 @@
 import { CookieConsent } from "@/components/shared/auth-consent";
-import { Navbar } from "@/components/shared/footer";
 import { Footer } from "@/components/shared/navbar";
 import { ModeToggle } from "@/components/theme/mode-togle";
 import { AuthProvider } from "@/contexts/auth-context";
@@ -17,13 +16,15 @@ const RootLayout = () => (
             <ModeToggle />
             <AuthProvider>
                 <div className="min-h-screen">
-                    <Navbar />
                     <Outlet />
                     <Footer />
                     <CookieConsent />
                 </div>
             </AuthProvider>
-            <TanStackRouterDevtools initialIsOpen={false} />
+            <TanStackRouterDevtools
+                initialIsOpen={false}
+                position="top-right"
+            />
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     </ThemeProvider>

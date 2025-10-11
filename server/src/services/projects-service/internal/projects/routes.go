@@ -14,7 +14,9 @@ func RegisterProjectsServiceRoutes(api fiber.Router, db *sqlx.DB) {
 	projectsGroup.Post("/create", authMiddleware, func(c *fiber.Ctx) error {
 		return createProjectRoute(c, db)
 	})
-
+	projectsGroup.Get("/user", authMiddleware, func(c *fiber.Ctx) error {
+		return getProjectsForUserRoute(c, db)
+	})
 }
 
 func createProjectRoute(ctx *fiber.Ctx, db *sqlx.DB) error {
@@ -44,5 +46,22 @@ func createProjectRoute(ctx *fiber.Ctx, db *sqlx.DB) error {
 	return ctx.Status(statusCode).JSON(fiber.Map{
 		"message":    "Project created successfully",
 		"project_id": projectID,
+	})
+}
+
+func getProjectsForUserRoute(ctx *fiber.Ctx, db *sqlx.DB) error {
+	userID := ctx.Locals("user_id").(string)
+
+	page := ctx.QueryInt("page", 1)
+	limit := ctx.QueryInt("limit", 10)
+	projects, statusCode, err := GetProjectsForUserService(userID, page, limit, db)
+	if err != nil {
+		return ctx.Status(statusCode).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return ctx.Status(statusCode).JSON(fiber.Map{
+		"projects": projects,
 	})
 }

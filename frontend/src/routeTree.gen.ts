@@ -8,10 +8,21 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignupIndexRouteImport } from './routes/signup/index'
+import { Route as DashboardLayoutDashboardIndexRouteImport } from './routes/_dashboard-layout/dashboard/index'
 
+const DashboardLayoutLazyRouteImport = createFileRoute('/_dashboard-layout')()
+
+const DashboardLayoutLazyRoute = DashboardLayoutLazyRouteImport.update({
+  id: '/_dashboard-layout',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/_dashboard-layout.lazy').then((d) => d.Route),
+)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -22,35 +33,58 @@ const SignupIndexRoute = SignupIndexRouteImport.update({
   path: '/signup/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardLayoutDashboardIndexRoute =
+  DashboardLayoutDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => DashboardLayoutLazyRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signup': typeof SignupIndexRoute
+  '/dashboard': typeof DashboardLayoutDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signup': typeof SignupIndexRoute
+  '/dashboard': typeof DashboardLayoutDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_dashboard-layout': typeof DashboardLayoutLazyRouteWithChildren
   '/signup/': typeof SignupIndexRoute
+  '/_dashboard-layout/dashboard/': typeof DashboardLayoutDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signup'
+  fullPaths: '/' | '/signup' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signup'
-  id: '__root__' | '/' | '/signup/'
+  to: '/' | '/signup' | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/_dashboard-layout'
+    | '/signup/'
+    | '/_dashboard-layout/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardLayoutLazyRoute: typeof DashboardLayoutLazyRouteWithChildren
   SignupIndexRoute: typeof SignupIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_dashboard-layout': {
+      id: '/_dashboard-layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof DashboardLayoutLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,11 +99,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_dashboard-layout/dashboard/': {
+      id: '/_dashboard-layout/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardLayoutDashboardIndexRouteImport
+      parentRoute: typeof DashboardLayoutLazyRoute
+    }
   }
 }
 
+interface DashboardLayoutLazyRouteChildren {
+  DashboardLayoutDashboardIndexRoute: typeof DashboardLayoutDashboardIndexRoute
+}
+
+const DashboardLayoutLazyRouteChildren: DashboardLayoutLazyRouteChildren = {
+  DashboardLayoutDashboardIndexRoute: DashboardLayoutDashboardIndexRoute,
+}
+
+const DashboardLayoutLazyRouteWithChildren =
+  DashboardLayoutLazyRoute._addFileChildren(DashboardLayoutLazyRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardLayoutLazyRoute: DashboardLayoutLazyRouteWithChildren,
   SignupIndexRoute: SignupIndexRoute,
 }
 export const routeTree = rootRouteImport

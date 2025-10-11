@@ -1,4 +1,3 @@
-import SignupForm from "@/components/auth/signup-form";
 import type { SignupFormErrorsType, SignupFormType } from "@/types/auth-types";
 import { z } from "zod";
 

@@ -1,6 +1,6 @@
 import api, { setAccessTokenGetter } from "@/api/axios";
 import { AUTH_API } from "@/api/base-api-endpoints";
-import {
+import React, {
     createContext,
     type ReactNode,
     useContext,
@@ -9,8 +9,8 @@ import {
 } from "react";
 
 type AuthContextType = {
-    accessToken: string | null;
-    setAccessToken: (token: string | null) => void;
+    accessToken: React.RefObject<string | null> | string | null;
+    setAccessToken: React.Dispatch<React.SetStateAction<string | null>>;
     logout: () => Promise<void>;
     loading: boolean;
 };

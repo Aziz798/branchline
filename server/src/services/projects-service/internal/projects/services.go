@@ -55,3 +55,21 @@ func createProjectService(projectReq types.CreateProjectRequest, userID string, 
 
 	return projectID, fiber.StatusCreated, nil
 }
+
+func GetProjectsForUserService(userID string, page, limit int, db *sqlx.DB) ([]types.GetProjectsForUserRequest, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	projects, err := fetUserProjectsQueryWithPaginationQuery(userID, limit, offset, db)
+	if err != nil {
+		log.Default().Println("Error fetching user projects:", err)
+		return nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+	}
+
+	return projects, fiber.StatusOK, nil
+}

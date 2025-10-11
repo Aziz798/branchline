@@ -1,3 +1,4 @@
+import { Navbar } from "@/components/shared/footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -19,6 +20,8 @@ export const Route = createFileRoute("/")({
 function HomePage() {
     return (
         <>
+            <Navbar />
+
             {/* Hero Section */}
             <section
                 className="relative px-6 pt-32 pb-20 lg:px-8 lg:pt-40 lg:pb-28"

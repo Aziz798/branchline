@@ -13,15 +13,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^24.0.7",
-    "@types/pg": "^8.15.4",
-    "drizzle-kit": "^0.31.4",
-    "typescript": "^5.7.2"
+    "@types/node": "^24.7.1",
+    "@types/pg": "^8.15.5",
+    "drizzle-kit": "^0.31.5",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "dotenv": "^17.0.0",
-    "drizzle-orm": "^0.44.2",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.44.6",
     "pg": "^8.16.3"
   },
-  "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a"
+  "packageManager": "pnpm@8.10.1"
 }

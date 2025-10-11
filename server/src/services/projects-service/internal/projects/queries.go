@@ -26,3 +26,32 @@ func checkHowManyProjectsUserHasQuery(userID string, db *sqlx.Tx) (int, error) {
 	}
 	return count, nil
 }
+
+// Fetch user projects with pagination and nummber of pages
+func fetUserProjectsQueryWithPaginationQuery(userID string, limit, offset int, db *sqlx.DB) ([]types.GetProjectsForUserRequest, error) {
+	q := `SELECT id, name, description, start_date, end_date, owner_id, created_at, updated_at,status,
+		CEIL(COUNT(*) OVER()::DECIMAL / $2) AS number_of_pages
+		FROM projects
+		WHERE owner_id=$1
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3`
+	rows, err := db.Queryx(q, userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var projects []types.GetProjectsForUserRequest
+	for rows.Next() {
+		var project types.GetProjectsForUserRequest
+		err := rows.StructScan(&project)
+		if err != nil {
+			return nil, err
+		}
+		projects = append(projects, project)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
