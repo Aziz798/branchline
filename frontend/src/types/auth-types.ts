@@ -13,3 +13,8 @@ export type SignupFormErrorsType =
         confirm_password?: { errors: string[] };
     }
     | undefined;
+
+export type LoginFormErrorsType = {
+    email?: { errors: string[] };
+    password?: { errors: string[] };
+} | undefined;

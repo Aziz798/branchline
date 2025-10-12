@@ -171,3 +171,35 @@ func ResendVerificationEmailService(email string, db *sqlx.DB) (int, error) {
 
 	return fiber.StatusOK, nil
 }
+
+func LoginUserWithEmailService(user types.UserLoginWithEmailType, db *sqlx.DB) (*types.Tokens, int, error) {
+	// Get user by email
+	storedUser, err := GetUserByEmailQuery(user.Email, db)
+	if err != nil {
+		log.Default().Println("Error fetching user by email:", err)
+		return nil, fiber.StatusNotFound, ErrUserNotFound
+	}
+
+	// Check if user is active
+	if !storedUser.IsActive.Bool {
+		log.Default().Println("User email not verified:", user.Email)
+		return nil, fiber.StatusForbidden, errors.New("email is not verified")
+	}
+	// Verify password
+	err = utils.VerifyPassword(storedUser.Password.String, user.Password)
+	if err != nil {
+		log.Default().Println("Invalid password attempt for user:", user.Email)
+		return nil, fiber.StatusConflict, errors.New("invalid email or password")
+	}
+	// Generate auth tokens
+	token, refreshToken, err := utils.GenerateToken(storedUser.ID.Bytes, string(storedUser.Role), storedUser.IsPremium.Bool, storedUser.IsActive.Bool)
+	if err != nil {
+		log.Default().Println("Error generating tokens for user:", user.Email, "Error:", err)
+		return nil, fiber.StatusInternalServerError, fmt.Errorf("failed to generate auth token: %v", err)
+	}
+
+	return &types.Tokens{
+		AccessToken:  token,
+		RefreshToken: refreshToken,
+	}, fiber.StatusOK, nil
+}

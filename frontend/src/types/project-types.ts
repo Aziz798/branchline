@@ -23,3 +23,10 @@ export type ProjectStatus =
     | "testing"
     | "deployed"
     | "archived";
+
+export type CreateProjectRequestType = {
+    name: string;
+    description?: string;
+    start_date?: Date;
+    end_date?: Date;
+};

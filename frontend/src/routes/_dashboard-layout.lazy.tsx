@@ -62,7 +62,6 @@ function DashboardLayout() {
       return response.data;
     },
   });
-  console.log(projects.data?.projects);
 
   return (
     <SidebarProvider>
@@ -98,52 +97,54 @@ function DashboardLayout() {
             <SidebarMenu>
               {projects.isLoading
                 ? <div>Loading...</div>
-                : projects.data?.projects.map((project) => {
-                  const { variant, label } = getStatusBadge(project.status);
-                  return (
-                    <SidebarMenuItem key={project.id}>
-                      <SidebarMenuButton asChild>
-                        <Link to={`/dashboard`}>
-                          <Badge
-                            variant={variant}
-                            className="h-5 px-1.5 text-[10px] font-medium"
-                          >
-                            {label}
-                          </Badge>
-                          <HoverCard>
-                            <HoverCardTrigger asChild>
-                              <span className="flex-1 truncate cursor-pointer">
-                                {project.name}
-                              </span>
-                            </HoverCardTrigger>
-                            <HoverCardContent
-                              side="right"
-                              align="start"
-                              className="w-80"
+                : projects.data?.projects &&
+                  projects.data.projects.length > 0 &&
+                  projects.data.projects.map((project) => {
+                    const { variant, label } = getStatusBadge(project.status);
+                    return (
+                      <SidebarMenuItem key={project.id}>
+                        <SidebarMenuButton asChild>
+                          <Link to={`/dashboard`}>
+                            <Badge
+                              variant={variant}
+                              className="h-5 px-1.5 text-[10px] font-medium"
                             >
-                              <div className="space-y-2">
-                                <h4 className="text-sm font-semibold">
+                              {label}
+                            </Badge>
+                            <HoverCard>
+                              <HoverCardTrigger asChild>
+                                <span className="flex-1 truncate cursor-pointer">
                                   {project.name}
-                                </h4>
-                                <p className="text-sm text-muted-foreground">
-                                  {project.description}
-                                </p>
-                                <div className="flex items-center gap-2 pt-2">
-                                  <Badge
-                                    variant={variant}
-                                    className="text-[10px]"
-                                  >
-                                    {label}
-                                  </Badge>
+                                </span>
+                              </HoverCardTrigger>
+                              <HoverCardContent
+                                side="right"
+                                align="start"
+                                className="w-80"
+                              >
+                                <div className="space-y-2">
+                                  <h4 className="text-sm font-semibold">
+                                    {project.name}
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {project.description}
+                                  </p>
+                                  <div className="flex items-center gap-2 pt-2">
+                                    <Badge
+                                      variant={variant}
+                                      className="text-[10px]"
+                                    >
+                                      {label}
+                                    </Badge>
+                                  </div>
                                 </div>
-                              </div>
-                            </HoverCardContent>
-                          </HoverCard>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+                              </HoverCardContent>
+                            </HoverCard>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
             </SidebarMenu>
           </div>
         </SidebarContent>

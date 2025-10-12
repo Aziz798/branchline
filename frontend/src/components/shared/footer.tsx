@@ -44,7 +44,7 @@ export function Navbar() {
                     <div className="flex items-center gap-4">
                         <ModeToggle />
                         <Button variant="ghost" size="sm" asChild>
-                            <Link to="/">Sign In</Link>
+                            <Link to="/login">Sign In</Link>
                         </Button>
                         <Button size="sm" asChild>
                             <Link to="/signup">Get Started</Link>

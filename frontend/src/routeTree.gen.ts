@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignupIndexRouteImport } from './routes/signup/index'
+import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as DashboardLayoutDashboardIndexRouteImport } from './routes/_dashboard-layout/dashboard/index'
 
 const DashboardLayoutLazyRouteImport = createFileRoute('/_dashboard-layout')()
@@ -33,6 +34,11 @@ const SignupIndexRoute = SignupIndexRouteImport.update({
   path: '/signup/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginIndexRoute = LoginIndexRouteImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardLayoutDashboardIndexRoute =
   DashboardLayoutDashboardIndexRouteImport.update({
     id: '/dashboard/',
@@ -42,11 +48,13 @@ const DashboardLayoutDashboardIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginIndexRoute
   '/signup': typeof SignupIndexRoute
   '/dashboard': typeof DashboardLayoutDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginIndexRoute
   '/signup': typeof SignupIndexRoute
   '/dashboard': typeof DashboardLayoutDashboardIndexRoute
 }
@@ -54,18 +62,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_dashboard-layout': typeof DashboardLayoutLazyRouteWithChildren
+  '/login/': typeof LoginIndexRoute
   '/signup/': typeof SignupIndexRoute
   '/_dashboard-layout/dashboard/': typeof DashboardLayoutDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signup' | '/dashboard'
+  fullPaths: '/' | '/login' | '/signup' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signup' | '/dashboard'
+  to: '/' | '/login' | '/signup' | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_dashboard-layout'
+    | '/login/'
     | '/signup/'
     | '/_dashboard-layout/dashboard/'
   fileRoutesById: FileRoutesById
@@ -73,6 +83,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardLayoutLazyRoute: typeof DashboardLayoutLazyRouteWithChildren
+  LoginIndexRoute: typeof LoginIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
 }
 
@@ -99,6 +110,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_dashboard-layout/dashboard/': {
       id: '/_dashboard-layout/dashboard/'
       path: '/dashboard'
@@ -123,6 +141,7 @@ const DashboardLayoutLazyRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardLayoutLazyRoute: DashboardLayoutLazyRouteWithChildren,
+  LoginIndexRoute: LoginIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
 }
 export const routeTree = rootRouteImport

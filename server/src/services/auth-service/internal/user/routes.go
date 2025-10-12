@@ -17,6 +17,7 @@ func RegisterUserRoutes(api fiber.Router, db *sqlx.DB) {
 	verifyEmailRoute(userGroup, db, authMiddleware)
 	resendVerificationEmailRoute(userGroup, db, authMiddleware)
 	refreshTokenRoute(userGroup)
+	LoginUserWithEmailRoute(userGroup, db)
 	logoutRoute(userGroup, authMiddleware)
 }
 
@@ -196,6 +197,40 @@ func logoutRoute(userGroup fiber.Router, authMiddleware fiber.Handler) {
 
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"message": "Logged out successfully",
+		})
+	})
+}
+
+func LoginUserWithEmailRoute(userGroup fiber.Router, db *sqlx.DB) {
+	userGroup.Post("/login", func(c *fiber.Ctx) error {
+		var user types.UserLoginWithEmailType
+		if err := c.BodyParser(&user); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid request body",
+			})
+		}
+		errors := ValidateUserLoginWithEmail(user)
+		if errors != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"errors": errors,
+			})
+		}
+		tokens, status, err := LoginUserWithEmailService(user, db)
+		if err != nil {
+			return c.Status(status).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    tokens.RefreshToken,
+			HTTPOnly: true,
+			Secure:   true,
+			SameSite: "Strict",
+		})
+
+		return c.Status(status).JSON(fiber.Map{
+			"access_token": tokens.AccessToken,
 		})
 	})
 }

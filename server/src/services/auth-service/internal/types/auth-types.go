@@ -7,6 +7,11 @@ type UserRegistrationType struct {
 	ConfirmPassword string `json:"confirm_password" validate:"required,min=8,eqfield=Password"`
 }
 
+type UserLoginWithEmailType struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8"`
+}
+
 type Tokens struct {
 	AccessToken  string `json:"token"`
 	RefreshToken string `json:"refresh_token"`

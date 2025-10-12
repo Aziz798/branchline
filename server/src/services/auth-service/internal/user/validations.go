@@ -15,6 +15,13 @@ func ValidateUserRegistrationWithEmail(user types.UserRegistrationType) interfac
 	}
 	return nil
 }
+func ValidateUserLoginWithEmail(user types.UserLoginWithEmailType) interface{} {
+	errors := v.Validate(user)
+	if errors != nil {
+		return errors
+	}
+	return nil
+}
 
 func ValidateEmailVerification(otpCode string) interface{} {
 

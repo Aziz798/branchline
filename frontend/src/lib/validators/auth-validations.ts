@@ -1,4 +1,8 @@
-import type { SignupFormErrorsType, SignupFormType } from "@/types/auth-types";
+import type {
+    LoginFormErrorsType,
+    SignupFormErrorsType,
+    SignupFormType,
+} from "@/types/auth-types";
 import { z } from "zod";
 
 /**
@@ -64,6 +68,22 @@ export function validateSignupForm(
                 });
             }
         });
+
+    const result = schema.safeParse(form);
+    if (!result.success) {
+        const errors = z.treeifyError(result.error).properties;
+        return { success: false, errors };
+    }
+    return { success: true };
+}
+
+export function validateLoginForm(
+    form: { email: string; password: string },
+): { success: true } | { success: false; errors: LoginFormErrorsType } {
+    const schema = z.object({
+        email: z.email("Invalid email address"),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+    });
 
     const result = schema.safeParse(form);
     if (!result.success) {
