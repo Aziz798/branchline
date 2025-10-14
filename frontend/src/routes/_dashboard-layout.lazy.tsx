@@ -1,13 +1,7 @@
-import api from "@/api/axios";
-import { PROJECTS_API } from "@/api/base-api-endpoints";
+import ProjectsSkeleton from "@/components/dashboard/projects-skeleton";
+import SidebarMenuProjects from "@/components/dashboard/sidebar-menu-projects";
+import CreateProjectDrawer from "@/components/projects/create-project-drawer";
 import { ModeToggle } from "@/components/theme/mode-togle";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import {
   Sidebar,
   SidebarContent,
@@ -21,48 +15,15 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import type {
-  GetProjectsForUserResponse,
-  ProjectStatus,
-} from "@/types/project-types";
-import { useQuery } from "@tanstack/react-query";
 import { createLazyFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { Plus, Settings, User } from "lucide-react";
-function getStatusBadge(status: ProjectStatus) {
-  const statusMap: Record<
-    ProjectStatus,
-    {
-      variant: "default" | "secondary" | "destructive" | "outline";
-      label: string;
-    }
-  > = {
-    not_started: { variant: "secondary", label: "Not Started" },
-    in_progress: { variant: "default", label: "In Progress" },
-    completed: { variant: "outline", label: "Completed" },
-    on_hold: { variant: "secondary", label: "On Hold" },
-    cancelled: { variant: "destructive", label: "Cancelled" },
-    blocked: { variant: "destructive", label: "Blocked" },
-    review: { variant: "outline", label: "Review" },
-    testing: { variant: "outline", label: "Testing" },
-    deployed: { variant: "default", label: "Deployed" },
-    archived: { variant: "secondary", label: "Archived" },
-  };
-  return statusMap[status];
-}
+import { Settings, User } from "lucide-react";
+import { Suspense } from "react";
 
 export const Route = createLazyFileRoute("/_dashboard-layout")({
   component: DashboardLayout,
 });
 
 function DashboardLayout() {
-  const projects = useQuery<GetProjectsForUserResponse>({
-    queryKey: ["projectsForUser"],
-    queryFn: async () => {
-      const response = await api.get(PROJECTS_API + "/projects/user");
-      return response.data;
-    },
-  });
-
   return (
     <SidebarProvider>
       <Sidebar>
@@ -86,65 +47,13 @@ function DashboardLayout() {
               <span className="text-xs font-medium text-muted-foreground">
                 Projects
               </span>
-              <Button size="icon" variant="ghost" className="h-6 w-6" asChild>
-                <Link to="/dashboard">
-                  <Plus className="h-4 w-4" />
-                  <span className="sr-only">New Project</span>
-                </Link>
-              </Button>
+              <CreateProjectDrawer />
             </div>
 
             <SidebarMenu>
-              {projects.isLoading
-                ? <div>Loading...</div>
-                : projects.data?.projects &&
-                  projects.data.projects.length > 0 &&
-                  projects.data.projects.map((project) => {
-                    const { variant, label } = getStatusBadge(project.status);
-                    return (
-                      <SidebarMenuItem key={project.id}>
-                        <SidebarMenuButton asChild>
-                          <Link to={`/dashboard`}>
-                            <Badge
-                              variant={variant}
-                              className="h-5 px-1.5 text-[10px] font-medium"
-                            >
-                              {label}
-                            </Badge>
-                            <HoverCard>
-                              <HoverCardTrigger asChild>
-                                <span className="flex-1 truncate cursor-pointer">
-                                  {project.name}
-                                </span>
-                              </HoverCardTrigger>
-                              <HoverCardContent
-                                side="right"
-                                align="start"
-                                className="w-80"
-                              >
-                                <div className="space-y-2">
-                                  <h4 className="text-sm font-semibold">
-                                    {project.name}
-                                  </h4>
-                                  <p className="text-sm text-muted-foreground">
-                                    {project.description}
-                                  </p>
-                                  <div className="flex items-center gap-2 pt-2">
-                                    <Badge
-                                      variant={variant}
-                                      className="text-[10px]"
-                                    >
-                                      {label}
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </HoverCardContent>
-                            </HoverCard>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
+              <Suspense fallback={<ProjectsSkeleton />}>
+                <SidebarMenuProjects />
+              </Suspense>
             </SidebarMenu>
           </div>
         </SidebarContent>

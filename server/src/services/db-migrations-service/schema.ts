@@ -33,6 +33,7 @@ export const userRoleInProjects = pgEnum("user_role_in_projects", [
     "stakeholder",
     "product_owner",
     "project_manager",
+    "owner",
 ]);
 
 export const taskStatuses = pgEnum("task_statuses", [
@@ -134,3 +135,14 @@ export const messagesTable = pgTable("messages", {
     index("messages_created_at_idx").on(table.created_at),
     index("messages_updated_at_idx").on(table.updated_at),
 ]);
+
+export const projectInvitesTable = pgTable("project_invites", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    project_id: uuid("project_id").notNull().references(() => projectsTable.id),
+    token_hash: varchar("token_hash", { length: 255 }).notNull(),
+    role: userRoleInProjects("role").notNull().default("developer"),
+    inviter_id: uuid("inviter_id").notNull(),
+    expires_at: timestamp("expires_at"),
+    used: boolean("used").notNull().default(false),
+    created_at: timestamp("created_at").notNull().defaultNow(),
+});

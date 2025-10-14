@@ -8,8 +8,13 @@ import (
 
 func createProjectQuery(project types.CreateProjectRequest, userID string, db *sqlx.Tx) (uuid.UUID, error) {
 	q := `INSERT INTO projects (name, description, start_date, end_date, owner_id) VALUES ($1,$2,$3,$4,$5) RETURNING id`
+	q2 := `INSERT INTO project_members (project_id, user_id, role, inviter_id) VALUES ($1,$2,'owner',$2)`
 	var projectID uuid.UUID
 	err := db.QueryRow(q, project.Name, project.Description, project.StartDate, project.EndDate, userID).Scan(&projectID)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	_, err = db.Exec(q2, projectID, userID)
 	if err != nil {
 		return uuid.Nil, err
 	}

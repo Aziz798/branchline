@@ -1,6 +1,8 @@
 package projects
 
 import (
+	"log"
+
 	"branchline.me/server/src/libs/go/middleware"
 	"branchline.me/server/src/services/projects-service/internal/types"
 
@@ -22,6 +24,7 @@ func RegisterProjectsServiceRoutes(api fiber.Router, db *sqlx.DB) {
 func createProjectRoute(ctx *fiber.Ctx, db *sqlx.DB) error {
 	var projectReq types.CreateProjectRequest
 	if err := ctx.BodyParser(&projectReq); err != nil {
+		log.Default().Println("Error parsing request body:", err)
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Invalid request body",
 		})

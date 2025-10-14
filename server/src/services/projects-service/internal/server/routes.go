@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"branchline.me/server/src/services/projects-service/internal/projects"
+	projectsmebers "branchline.me/server/src/services/projects-service/internal/projects-mebers"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
@@ -54,4 +55,5 @@ func (s *ProjectsServer) RegisterProjectsServiceRoutes() {
 		SkipSuccessfulRequests: false,
 	}))
 	projects.RegisterProjectsServiceRoutes(api, s.db.DB())
+	projectsmebers.RegisterProjectsMembersRoutes(api, s.db.DB())
 }
