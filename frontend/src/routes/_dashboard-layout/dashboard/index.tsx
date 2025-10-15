@@ -8,6 +8,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import { useSetPageTitle } from "@/contexts/dashboard-layout-title-context";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Clock,
@@ -18,6 +19,8 @@ import {
   Users,
   Video,
 } from "lucide-react";
+import { useEffect } from "react";
+
 export const Route = createFileRoute("/_dashboard-layout/dashboard/")({
   component: DashboardPage,
 });
@@ -79,6 +82,13 @@ const stats = [
 ];
 
 function DashboardPage() {
+  const setTitle = useSetPageTitle();
+
+  useEffect(() => {
+    setTitle("Dashboard");
+    return () => setTitle("Dashboard");
+  }, [setTitle]);
+
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Stats Grid */}

@@ -1,164 +1,57 @@
+import { ModeToggle } from "@/components/theme/mode-toggle";
+import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 
-export function Footer() {
+export function Navbar() {
     return (
-        <footer className="border-t border-border/40 bg-card">
-            <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-                <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-                    <div>
-                        <h3 className="mb-4 text-sm font-semibold">Product</h3>
-                        <ul className="space-y-3">
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Features
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Pricing
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Integrations
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Changelog
-                                </Link>
-                            </li>
-                        </ul>
+        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-lg">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <div className="flex h-16 items-center justify-between">
+                    <div className="flex items-center gap-8">
+                        <Link to="/" className="flex items-center gap-2">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                                <span className="font-mono text-lg font-bold text-primary-foreground">
+                                    B
+                                </span>
+                            </div>
+                            <span className="font-sans text-xl font-semibold">
+                                branchline
+                            </span>
+                        </Link>
+
+                        <div className="hidden items-center gap-6 md:flex">
+                            <Link
+                                to="/"
+                                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                            >
+                                Features
+                            </Link>
+                            <Link
+                                to="/"
+                                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                            >
+                                Pricing
+                            </Link>
+                            <Link
+                                to="/"
+                                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                            >
+                                Docs
+                            </Link>
+                        </div>
                     </div>
 
-                    <div>
-                        <h3 className="mb-4 text-sm font-semibold">
-                            Resources
-                        </h3>
-                        <ul className="space-y-3">
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Documentation
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    API Reference
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Guides
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Support
-                                </Link>
-                            </li>
-                        </ul>
+                    <div className="flex items-center gap-4">
+                        <ModeToggle />
+                        <Button variant="ghost" size="sm" asChild>
+                            <Link to="/login">Sign In</Link>
+                        </Button>
+                        <Button size="sm" asChild>
+                            <Link to="/signup">Get Started</Link>
+                        </Button>
                     </div>
-
-                    <div>
-                        <h3 className="mb-4 text-sm font-semibold">Company</h3>
-                        <ul className="space-y-3">
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    About
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Blog
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Careers
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Contact
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="mb-4 text-sm font-semibold">Legal</h3>
-                        <ul className="space-y-3">
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Privacy
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Terms
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                    Security
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div className="mt-12 border-t border-border/40 pt-8">
-                    <p className="text-center text-sm text-muted-foreground">
-                        © {new Date().getFullYear()}{" "}
-                        Branchline. All rights reserved.
-                    </p>
                 </div>
             </div>
-        </footer>
+        </nav>
     );
 }

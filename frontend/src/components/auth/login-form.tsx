@@ -67,30 +67,47 @@ export default function LoginForm(
         mutation.mutate(logindata, {
             onSuccess: (data) => {
                 authContext.setAccessToken(data.data.access_token);
+                // clear form state on success
+                setLoginData({ email: "", password: "" });
+                setFormErrors(null);
+                setSubmitError(null);
                 navigate({ to: "/dashboard" });
             },
             onError: async (error: any) => {
-                console.log(error.status);
-                if (error.response.status === 400) {
-                    setFormErrors(error.response.data.errors);
+                // normalize axios errors safely
+                const status = error?.response?.status ?? error?.status ?? null;
+                const data = error?.response?.data ?? null;
+
+                if (status === 400) {
+                    setFormErrors(data?.errors ?? null);
                     return;
                 }
-                if (error.response.status === 403) {
+
+                if (status === 403) {
                     setIsOpen(true);
                     setSubmitError("Please verify your email to login.");
-                    await api.post(AUTH_API + "/users/resend-verification");
+                    try {
+                        // best-effort resend; ignore errors
+                        await api.post(AUTH_API + "/users/resend-verification");
+                    } catch (e) {
+                        // no-op
+                    }
 
                     return;
                 }
-                if (error.response.status === 409) {
-                    console.log(error.response);
-                    setSubmitError(error.response.data.error);
+
+                if (status === 409) {
+                    setSubmitError(
+                        data?.error ?? "Conflict error. Please try again.",
+                    );
                     return;
                 }
-                if (error.response.status === 500) {
+
+                if (status === 500) {
                     setSubmitError("Something went wrong. Please try again.");
                     return;
                 }
+
                 setSubmitError("Something went wrong. Please try again.");
             },
         });

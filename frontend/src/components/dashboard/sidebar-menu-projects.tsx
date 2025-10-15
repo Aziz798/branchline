@@ -12,7 +12,7 @@ import type {
     ProjectStatus,
 } from "@/types/project-types";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 function getStatusBadge(status: ProjectStatus) {
     const statusMap: Record<
@@ -41,6 +41,7 @@ export default function SidebarMenuProjects() {
         queryKey: ["projectsForUser"],
         queryFn: async () => {
             const response = await api.get(PROJECTS_API + "/projects/user");
+
             return response.data;
         },
     });
@@ -55,7 +56,10 @@ export default function SidebarMenuProjects() {
                     return (
                         <SidebarMenuItem key={project.id}>
                             <SidebarMenuButton asChild>
-                                <Link to={`/dashboard`}>
+                                <Link
+                                    to={`/project/$id`}
+                                    params={{ id: project.id }}
+                                >
                                     <Badge
                                         variant={variant}
                                         className="h-5 px-1.5 text-[10px] font-medium"

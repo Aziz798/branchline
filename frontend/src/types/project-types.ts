@@ -30,3 +30,19 @@ export type CreateProjectRequestType = {
     start_date?: Date;
     end_date?: Date;
 };
+
+export type typeGetProjectWithTasksByIdResponse = {
+    id: string;
+    name: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    status: ProjectStatus;
+    tasks: {
+        id: string;
+        title: string;
+        description: string;
+        status: string;
+        project_id: string;
+    }[];
+};

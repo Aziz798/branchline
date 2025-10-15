@@ -82,7 +82,7 @@ export const projectsTable = pgTable("projects", {
 });
 
 export const projectMembersTable = pgTable("project_members", {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     user_id: uuid("user_id").notNull().references(() => usersTable.id),
     project_id: uuid("project_id").notNull().references(
         () => projectsTable.id,

@@ -69,20 +69,34 @@ export default function SignupForm(
         mutation.mutate(form, {
             onSuccess: (respnse) => {
                 authContext.setAccessToken(respnse.data.access_token);
+                // clear form on successful signup
+                setForm({
+                    name: "",
+                    email: "",
+                    password: "",
+                    confirm_password: "",
+                });
+                setErrors(null);
+                setSubmitError(null);
                 setIsOpen(true);
             },
             onError: (error: any) => {
-                if (error.status === 500) {
+                const status = error?.response?.status ?? error?.status ?? null;
+                const data = error?.response?.data ?? null;
+
+                if (status === 500) {
                     setSubmitError("Something went wrong. Please try again.");
                 }
-                if (error.status === 409) {
-                    setSubmitError("User with this email already exists.");
+                if (status === 409) {
+                    setSubmitError(
+                        data?.error ?? "User with this email already exists.",
+                    );
                     setErrors({
                         email: { errors: ["Email already in use."] },
                     });
                 }
-                if (error.status === 400) {
-                    setErrors(error.response.data.errors);
+                if (status === 400) {
+                    setErrors(data?.errors ?? null);
                 }
             },
             onSettled: () => setIsSubmitting(false),

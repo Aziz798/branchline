@@ -15,8 +15,8 @@ import { validateCreateProjectForm } from "@/lib/validators/projects-validators"
 import type { CreateProjectRequestType } from "@/types/project-types";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
+import { Button } from "../../ui/button";
+import { Textarea } from "../../ui/textarea";
 import { Calendar28 } from "./date-picker";
 
 export default function CreateProjectForm(
@@ -39,9 +39,16 @@ export default function CreateProjectForm(
         },
         onSuccess: (data) => {
             console.log("Project created successfully:", data);
+            // reset form state on success
+            setFormData({ name: "", description: "" });
+            setStartDate(undefined);
+            setEndDate(undefined);
         },
-        onError: (error) => {
-            console.error("Error creating project:", error);
+        onError: (error: any) => {
+            // robust error logging
+            const status = error?.response?.status ?? error?.status ?? null;
+            const data = error?.response?.data ?? null;
+            console.error("Error creating project:", { status, data, error });
         },
     });
     function handleChange(
@@ -63,6 +70,12 @@ export default function CreateProjectForm(
         console.log(submitData);
 
         const results = validateCreateProjectForm(submitData);
+        if (!results.success) {
+            // TODO: surface validation errors to the user (future)
+            console.warn("Validation failed for create project form:", results);
+            return;
+        }
+
         mutation.mutate(submitData);
         console.log(results);
     }

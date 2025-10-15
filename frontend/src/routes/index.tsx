@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/shared/footer";
+import { Navbar } from "@/components/shared/navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createFileRoute, Link } from "@tanstack/react-router";

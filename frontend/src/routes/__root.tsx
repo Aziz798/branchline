@@ -1,6 +1,6 @@
 import { CookieConsent } from "@/components/shared/auth-consent";
-import { Footer } from "@/components/shared/navbar";
-import { ModeToggle } from "@/components/theme/mode-togle";
+import { Footer } from "@/components/shared/footer";
+import { ModeToggle } from "@/components/theme/mode-toggle";
 import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

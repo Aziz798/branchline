@@ -42,7 +42,7 @@ func createProjectService(projectReq types.CreateProjectRequest, userID string, 
 			return uuid.Nil, fiber.StatusForbidden, errors.New("free users can only create up to 5 projects")
 		}
 	}
-	projectID, err := createProjectQuery(projectReq, userID, tx)
+	projectID, err := createProjectQuery(projectReq, userID, db)
 	if err != nil {
 		log.Default().Println("Error creating project:", err)
 		return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
@@ -72,4 +72,16 @@ func GetProjectsForUserService(userID string, page, limit int, db *sqlx.DB) ([]t
 	}
 
 	return projects, fiber.StatusOK, nil
+}
+
+func GetProjectWithTasksService(projectID string, userID string, db *sqlx.DB) (types.GetProjectWithTAsksRequest, int, error) {
+	project, err := fetchProjectWithTasksQuery(projectID, userID, db)
+	if err != nil {
+		log.Default().Println("Error fetching project with tasks:", err)
+		return types.GetProjectWithTAsksRequest{}, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+	}
+	if project.ID == "" {
+		return types.GetProjectWithTAsksRequest{}, fiber.StatusNotFound, errors.New("project not found or you do not have access to it")
+	}
+	return project, fiber.StatusOK, nil
 }

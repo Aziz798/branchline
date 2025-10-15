@@ -1,6 +1,6 @@
 import LoginForm from "@/components/auth/login-form";
 import OtpCodeDialog from "@/components/auth/otp-code-dialog";
-import { Navbar } from "@/components/shared/footer";
+import { Navbar } from "@/components/shared/navbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
