@@ -1,5 +1,6 @@
 import api, { setAccessTokenGetter } from "@/api/axios";
 import { AUTH_API } from "@/api/base-api-endpoints";
+import axios from "axios";
 import React, {
     createContext,
     type ReactNode,
@@ -31,7 +32,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = (
     useEffect(() => {
         const initAuth = async () => {
             try {
-                const res = await api.post(AUTH_API + "/users/refresh-token"); // refresh cookie → new token
+                const res = await axios.post(
+                    AUTH_API + "/users/refresh-token",
+                    {},
+                    {
+                        withCredentials: true,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                        },
+                    },
+                ); // refresh cookie → new token
                 setAccessToken(res.data.access_token);
                 console.log("Session restored");
             } catch {
