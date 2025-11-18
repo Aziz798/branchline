@@ -37,7 +37,7 @@ func addMmberToProjectQuery(projectID uuid.UUID, userID uuid.UUID, role string, 
 }
 
 func markInviteAsUsedQuery(inviteID uuid.UUID, db *sqlx.Tx) error {
-	q := `UPDATE project_invites SET used=TRUE WHERE id=$1`
+	q := `UPDATE project_invites SET used=TRUE is_pending=FALSE WHERE id=$1`
 	_, err := db.Exec(q, inviteID)
 	if err != nil {
 		return err
@@ -57,4 +57,26 @@ func getProjectInviteByHashQuery(tokenHash string, db *sqlx.DB) (types.Invite, e
 		return types.Invite{}, err
 	}
 	return inv, nil
+}
+
+func getAllPendingInvitesForProjectQuery(projectID uuid.UUID, db *sqlx.DB) ([]types.Invite, error) {
+	var invites []types.Invite
+	q := `SELECT id, project_id, role, expires_at, used FROM project_invites WHERE project_id=$1 AND is_pending=TRUE`
+	rows, err := db.Queryx(q, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var inv types.Invite
+		if err := rows.Scan(&inv.ID, &inv.ProjectID, &inv.Role, &inv.ExpiresAt, &inv.Used); err != nil {
+			return nil, err
+		}
+		invites = append(invites, inv)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return invites, nil
 }

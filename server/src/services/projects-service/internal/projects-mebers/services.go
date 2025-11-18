@@ -3,6 +3,7 @@ package projectsmebers
 import (
 	"time"
 
+	"branchline.me/server/src/services/projects-service/internal/types"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -70,4 +71,8 @@ func acceptInviteService(token string, userID uuid.UUID, db *sqlx.DB) error {
 		return err
 	}
 	return nil
+}
+
+func getAllPendingInvitesForProjectService(projectID uuid.UUID, db *sqlx.DB) ([]types.Invite, error) {
+	return getAllPendingInvitesForProjectQuery(projectID, db)
 }

@@ -142,6 +142,7 @@ export const projectInvitesTable = pgTable("project_invites", {
     role: userRoleInProjects("role").notNull().default("developer"),
     inviter_id: uuid("inviter_id").notNull(),
     expires_at: timestamp("expires_at"),
+    is_pending: boolean("is_pending").notNull().default(true),
     used: boolean("used").notNull().default(false),
     created_at: timestamp("created_at").notNull().defaultNow(),
 });

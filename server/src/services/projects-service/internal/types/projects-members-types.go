@@ -13,9 +13,10 @@ type AddProjectMemberRequest struct {
 }
 
 type Invite struct {
-	ID        uuid.UUID
-	ProjectID uuid.UUID
-	Role      string
-	ExpiresAt *time.Time
-	Used      bool
+	ID        uuid.UUID  `db:"id"`
+	ProjectID uuid.UUID  `db:"project_id"`
+	Role      string     `db:"role"`
+	ExpiresAt *time.Time `db:"expires_at"`
+	Used      bool       `db:"used"`
+	IsPending bool       `db:"is_pending"`
 }

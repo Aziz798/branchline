@@ -1,0 +1,1 @@
+ALTER TABLE "project_invites" ADD COLUMN "is_pending" boolean DEFAULT true NOT NULL;

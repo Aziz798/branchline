@@ -20,6 +20,9 @@ func RegisterProjectsMembersRoutes(api fiber.Router, db *sqlx.DB) {
 	projectsMembersGroup.Post("/invite/accept", authMiddleware, func(c *fiber.Ctx) error {
 		return acceptInviteRoute(c, db)
 	})
+	projectsMembersGroup.Get("/invites/project/:project_id", authMiddleware, func(c *fiber.Ctx) error {
+		return getAllPendingInvitesForProjectRoute(c, db)
+	})
 }
 
 func inviteMemberRoute(c *fiber.Ctx, db *sqlx.DB) error {
@@ -54,4 +57,18 @@ func acceptInviteRoute(c *fiber.Ctx, db *sqlx.DB) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true})
+}
+
+func getAllPendingInvitesForProjectRoute(c *fiber.Ctx, db *sqlx.DB) error {
+	var projectID uuid.UUID
+	if err := c.ParamsParser(&projectID); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid project_id"})
+	}
+
+	invites, err := getAllPendingInvitesForProjectService(projectID, db)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"invites": invites})
 }
