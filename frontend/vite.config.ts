@@ -10,6 +10,8 @@ export default defineConfig({
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
+      quoteStyle: "double",
+      semicolons: true,
     }),
     react({
       babel: {

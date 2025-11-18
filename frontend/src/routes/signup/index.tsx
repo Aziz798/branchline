@@ -1,6 +1,6 @@
 import OtpCodeDialog from "@/components/auth/otp-code-dialog";
 import SignupForm from "@/components/auth/signup-form";
-import { Navbar } from "@/components/shared/footer";
+import { Navbar } from "@/components/shared/navbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { GalleryVerticalEnd } from "lucide-react";
 import { useState } from "react";

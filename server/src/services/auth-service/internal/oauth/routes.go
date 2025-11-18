@@ -1,11 +1,15 @@
 package oauth
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
+	"branchline.me/server/src/services/auth-service/internal/types"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 func GoogleLogin(c *fiber.Ctx) error {
@@ -34,7 +38,7 @@ func GoogleLogin(c *fiber.Ctx) error {
 }
 
 // GoogleCallback handles the OAuth callback from Google
-func GoogleCallback(c *fiber.Ctx) error {
+func GoogleCallback(c *fiber.Ctx, db *sqlx.DB) error {
 	code := c.Query("code")
 	state := c.Query("state")
 
@@ -64,11 +68,18 @@ func GoogleCallback(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendString("User Data Fetch Failed")
 	}
-
+	var user types.GoogleOauthUser
+	defer resp.Body.Close()
 	userData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return c.SendString("JSON Parsing Failed")
 	}
+	err = json.Unmarshal(userData, &user)
+	if err != nil {
+		return c.SendString("JSON Unmarshal Failed")
+	}
+	//userID, status, err := registerUserWithGoogleService(user, db)
 
-	return c.SendString(string(userData))
+	log.Default().Println(user)
+	return c.SendString("Login Successful" + user.Email)
 }

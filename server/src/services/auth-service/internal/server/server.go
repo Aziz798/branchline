@@ -1,11 +1,11 @@
 package server
 
 import (
-	"github.com/gofiber/fiber/v2"
-
 	"branchline.me/server/src/libs/go/database"
 	"branchline.me/server/src/libs/go/validations"
 	"branchline.me/server/src/services/auth-service/internal/oauth"
+	"github.com/goccy/go-json"
+	"github.com/gofiber/fiber/v2"
 )
 
 type AuthServer struct {
@@ -19,6 +19,8 @@ func New() *AuthServer {
 		App: fiber.New(fiber.Config{
 			ServerHeader: "branchline-auth-service",
 			AppName:      "branchline-auth-service",
+			JSONEncoder:  json.Marshal,
+			JSONDecoder:  json.Unmarshal,
 			ErrorHandler: func(c *fiber.Ctx, err error) error {
 				return c.Status(fiber.StatusBadRequest).JSON(validations.GlobalErrorHandlerResp{
 					Success: false,

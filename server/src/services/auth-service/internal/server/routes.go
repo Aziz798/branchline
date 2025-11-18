@@ -56,5 +56,7 @@ func (s *AuthServer) RegisterAuthServiceRoutes() {
 	}))
 	user.RegisterUserRoutes(api, s.db.DB())
 	api.Get("/google", oauth.GoogleLogin)
-	api.Get("/oauth/google/callback", oauth.GoogleCallback)
+	api.Get("/oauth/google/callback", func(c *fiber.Ctx) error {
+		return oauth.GoogleCallback(c, s.db.DB())
+	})
 }

@@ -1,8 +1,12 @@
 export default function GoogleLoginButton(
     { buttonText }: { buttonText: "sign up" | "sign in" },
 ) {
+    function onClick() {
+        window.location.href =
+            "http://localhost:8080/'auth-service/api/v1/google";
+    }
     return (
-        <button className="gsi-material-button" type="button">
+        <button className="gsi-material-button" type="button" onClick={onClick}>
             <div className="gsi-material-button-state">
             </div>
             <div className="gsi-material-button-content-wrapper">

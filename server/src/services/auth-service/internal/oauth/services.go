@@ -24,7 +24,12 @@ func registerUserWithGoogleService(userData types.GoogleOauthUser, db *sqlx.DB) 
 		return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
 	}
 	if exists {
-		return uuid.Nil, fiber.StatusConflict, ErrUserExists
+		userFromDb, err := user.GetUserByEmailQuery(userData.Email, db)
+		if err != nil {
+			log.Default().Println("Error fetching user:", err)
+			return uuid.Nil, fiber.StatusInternalServerError, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+		}
+		return userFromDb.ID.Bytes, fiber.StatusOK, nil
 	}
 	tx, err := db.Beginx()
 	if err != nil {

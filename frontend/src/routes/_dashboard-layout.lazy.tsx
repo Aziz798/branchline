@@ -1,6 +1,4 @@
-import ProjectsSkeleton from "@/components/dashboard/projects-skeleton";
 import CreateProjectDrawer from "@/components/dashboard/projects/create-project-drawer";
-import SidebarMenuProjects from "@/components/dashboard/sidebar-menu-projects";
 import { ModeToggle } from "@/components/theme/mode-toggle";
 import {
   Sidebar,
@@ -18,7 +16,7 @@ import {
 import { PageTitleContext } from "@/contexts/dashboard-layout-title-context";
 import { createLazyFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Settings, User } from "lucide-react";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 
 export const Route = createLazyFileRoute("/_dashboard-layout")({
   component: DashboardLayout,
@@ -57,9 +55,11 @@ function DashboardLayout() {
               </div>
 
               <SidebarMenu>
-                <Suspense fallback={<ProjectsSkeleton />}>
+                {
+                  /* <Suspense fallback={<ProjectsSkeleton />}>
                   <SidebarMenuProjects />
-                </Suspense>
+                </Suspense> */
+                }
               </SidebarMenu>
             </div>
           </SidebarContent>

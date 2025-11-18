@@ -97,7 +97,6 @@ export const projectMembersTable = pgTable("project_members", {
     index("project_members_user_id_idx").on(table.user_id),
     index("project_members_role_idx").on(table.role),
 ]);
-
 export const tasksTable = pgTable("tasks", {
     id: uuid("id").primaryKey().defaultRandom(),
     title: varchar({ length: 255 }).notNull(),
